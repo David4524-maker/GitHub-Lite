@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub</title>
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js para renderizar Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- JSZip para generar descargas ZIP reales en el navegador -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body { background-color: #0d1117; color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+        .gh-btn { background-color: #238636; color: #ffffff; transition: background 0.2s; }
+        .gh-btn:hover { background-color: #2ea043; }
+        .gh-secondary-btn { background-color: #21262d; border: 1px solid rgba(240,246,252,0.1); color: #c9d1d9; }
+        .gh-secondary-btn:hover { background-color: #30363d; border-color: rgba(240,246,252,0.2); }
+        .gh-border { border-color: #30363d; }
+        .gh-bg { background-color: #161b22; }
+        .gh-input { background-color: #0d1117; border: 1px solid #30363d; color: #e6edf3; }
+        .gh-input:focus { border-color: #58a6ff; outline: none; box-shadow: 0 0 0 3px rgba(88,166,255,0.3); }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0d1117; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
+        .drag-over { border-color: #2ea043 !important; background-color: rgba(46, 160, 67, 0.15) !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
+
+    <!-- HEADER / NAVBAR -->
+    <header class="gh-bg border-b gh-border px-4 py-3 flex items-center justify-between flex-wrap gap-4 sticky top-0 z-40">
+        <div class="flex items-center space-x-4">
+            <i class="fa-brands fa-github text-4xl text-white cursor-pointer" onclick="showHome()" title="Ir al Dashboard"></i>
+            <div class="flex items-center space-x-1 text-sm font-semibold">
+                <span class="cursor-pointer hover:underline text-gray-300" onclick="showHome()">Dashboard</span>
+                <span class="text-gray-500">/</span>
+                <span id="header-user-badge" class="text-gray-300">User</span>
+            </div>
+            <div class="relative hidden sm:block">
+                <input type="text" id="global-search-input" oninput="filterRepositories(this.value)" placeholder="🔍 Buscar repositorios..." class="gh-input text-xs rounded-md px-3 py-1.5 w-64">
+            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="openStatsModal()" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5" title="Estadísticas">
+                <i class="fa-solid fa-chart-line text-green-400"></i> Stats
+            </button>
+            <button onclick="openGitCLIModal()" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5" title="Terminal Git Interactiva">
+                <i class="fa-solid fa-terminal text-orange-400"></i> Git CLI
+            </button>
+            <button onclick="openNewRepoModal()" class="gh-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> New repository
+            </button>
+            <div class="relative">
+                <div onclick="toggleUserMenu()" class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center font-bold text-xs cursor-pointer border border-white/20 shadow-lg" title="Menú de Usuario">
+                    :D
+                </div>
+                <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-48 gh-bg border gh-border rounded-lg shadow-2xl hidden py-2 text-xs z-50">
+                    <div class="px-4 py-2 border-b gh-border font-semibold">Conectado como <br><span class="text-blue-400">User</span></div>
+                    <a href="#" onclick="exportAllData(); return false;" class="block px-4 py-2 hover:bg-gray-800"><i class="fa-solid fa-download mr-2"></i> Exportar Backup JSON</a>
+                    <a href="#" onclick="resetFactorySettings(); return false;" class="block px-4 py-2 text-red-400 hover:bg-gray-800"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Reset de Fábrica</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NOTIFICACIONES TOAST -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6" id="main-content">
+        
+        <!-- VISTA DE INICIO / DASHBOARD -->
+        <div id="view-home" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="md:col-span-1 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">Top Repositories</h2>
+                    <button onclick="openNewRepoModal()" class="text-xs text-blue-400 hover:underline"><i class="fa-solid fa-book-bookmark"></i> New</button>
+                </div>
+                <div id="repo-list-sidebar" class="space-y-1 text-sm max-h-[60vh] overflow-y-auto custom-scrollbar"></div>
+            </div>
+
+            <div class="md:col-span-3 space-y-6">
+                <div class="gh-bg border gh-border rounded-lg p-6 relative overflow-hidden">
+                    <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 text-gray-800/20 text-9xl pointer-events-none">
+                        <i class="fa-brands fa-github"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold mb-2">GitHub Simulator <span class="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">v4.0 Pro</span></h1>
+                    <p class="text-sm text-gray-400 mb-4">Entorno de desarrollo simulado con soporte para carpetas, drag-and-drop de archivos, edición avanzada de README.md (vía texto, URL o archivo arrastrado), terminal Git y descargas ZIP.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="openNewRepoModal()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md"><i class="fa-solid fa-plus mr-1"></i> Crear repositorio</button>
+                        <button onclick="openGitCLIModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md"><i class="fa-solid fa-terminal mr-1"></i> Consola Git CLI</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-semibold">Tus Repositorios Activos</h3>
+                        <div class="text-xs text-gray-400" id="repo-counter-label">0 repositorios</div>
+                    </div>
+                    <div id="repo-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA DE DETALLE DE REPOSITORIO -->
+        <div id="view-repo" class="hidden space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b gh-border">
+                <div class="flex items-center space-x-2 text-lg">
+                    <i class="fa-solid fa-book text-gray-400"></i>
+                    <span id="repo-owner" class="text-blue-400 font-semibold cursor-pointer">user</span>
+                    <span class="text-gray-500">/</span>
+                    <span id="repo-name-title" class="text-blue-400 font-semibold cursor-pointer">nombre-repo</span>
+                    <span id="repo-visibility-badge" class="text-xs px-2 py-0.5 rounded-full border gh-border text-gray-400 ml-2">Public</span>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleStarRepo()" id="star-btn" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md"><i class="fa-regular fa-star text-yellow-400"></i> Star <span id="star-count" class="ml-1 px-1.5 py-0.2 bg-gray-800 rounded-full">0</span></button>
+                    
+                    <!-- BOTÓN DE MENÚ DE CÓDIGO <> CODE -->
+                    <div class="relative inline-block text-left">
+                        <button onclick="toggleCodeDropdown()" class="gh-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-code"></i> &lt;&gt; Code <i class="fa-solid fa-caret-down text-[10px]"></i>
+                        </button>
+                        <div id="code-dropdown-menu" class="absolute right-0 mt-2 w-56 gh-bg border gh-border rounded-lg shadow-2xl hidden py-2 text-xs z-50">
+                            <div class="px-3 py-1.5 border-b gh-border text-gray-400 font-semibold">Opciones del Repositorio</div>
+                            <a href="#" id="link-original-github" target="_blank" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 text-gray-200">
+                                <i class="fa-brands fa-github text-blue-400"></i> Open in Original GitHub
+                            </a>
+                            <a href="#" onclick="downloadRepoZip(); toggleCodeDropdown(); return false;" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-800 text-green-400">
+                                <i class="fa-solid fa-file-zipper"></i> Download ZIP
+                            </a>
+                        </div>
+                    </div>
+
+                    <button onclick="openRepoSettings()" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md text-red-400"><i class="fa-solid fa-gear"></i></button>
+                </div>
+            </div>
+
+            <!-- Pestañas del Repo -->
+            <div class="flex border-b gh-border space-x-6 text-sm overflow-x-auto">
+                <button onclick="switchTab('code')" id="tab-btn-code" class="pb-2 border-b-2 border-green-500 font-semibold flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-code"></i> Code</button>
+                <button onclick="switchTab('issues')" id="tab-btn-issues" class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-circle-exclamation"></i> Issues <span id="issues-badge" class="px-1.5 py-0.2 bg-gray-800 rounded-full text-xs">0</span></button>
+                <button onclick="switchTab('commits')" id="tab-btn-commits" class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left"></i> Commits <span id="commits-badge" class="px-1.5 py-0.2 bg-gray-800 rounded-full text-xs">0</span></button>
+            </div>
+
+            <!-- TAB: CODE -->
+            <div id="tab-content-code" class="space-y-4">
+                <!-- BARRA DE ACCIONES DE CÓDIGO Y NAVEGACIÓN DE CARPETAS -->
+                <div class="flex flex-wrap justify-between items-center bg-gray-900/50 p-3 rounded-md border gh-border gap-2">
+                    <div class="flex items-center space-x-2 text-xs flex-wrap gap-2">
+                        <select id="branch-selector" onchange="switchBranch(this.value)" class="gh-input px-2 py-1 rounded font-semibold text-xs"></select>
+                        <span class="text-gray-400"><i class="fa-solid fa-clock-rotate-left"></i> <span id="commit-count-display">1</span> commits</span>
+                        
+                        <!-- RUTA DE CARPETAS (BREADCRUMB) -->
+                        <div id="folder-breadcrumb" class="flex items-center space-x-1 text-xs font-mono text-blue-400 ml-2"></div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openNewFolderModal()" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5"><i class="fa-solid fa-folder-plus text-yellow-400"></i> New Folder</button>
+                        <button onclick="openUploadModal()" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5"><i class="fa-solid fa-upload text-blue-400"></i> Upload Files</button>
+                        <button onclick="openEditor()" class="gh-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Create/Edit File</button>
+                    </div>
+                </div>
+
+                <!-- ZONA DRAG AND DROP DIRECTA EN LA VISTA -->
+                <div id="drop-zone-main" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMain(event)" class="border-2 border-dashed gh-border rounded-md p-4 text-center transition cursor-pointer hover:border-gray-500 bg-gray-900/30">
+                    <p class="text-xs text-gray-400"><i class="fa-solid fa-cloud-arrow-up text-lg mb-1 block text-blue-400"></i> Arrastra y suelta archivos aquí para subirlos a la carpeta actual (<span id="current-folder-label" class="font-mono text-gray-200">/</span>)</p>
+                </div>
+
+                <!-- EXPLORADOR DE ARCHIVOS Y CARPETAS -->
+                <div class="border gh-border rounded-md overflow-hidden">
+                    <div class="bg-gray-900 px-4 py-3 border-b gh-border flex items-center justify-between text-xs text-gray-400 flex-wrap gap-2">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-[10px]">U</div>
+                            <span class="text-white font-semibold">User</span>
+                            <span id="latest-commit-msg" class="text-gray-300">Initial commit</span>
+                        </div>
+                        <span id="latest-commit-time" class="text-gray-500">hace un momento</span>
+                    </div>
+                    <div id="file-tree" class="divide-y divide-gray-800 text-sm"></div>
+                </div>
+
+                <!-- SECCIÓN README CON EDICIÓN MULTI-MODO -->
+                <div id="readme-container" class="border gh-border rounded-md p-6 bg-[#0d1117] hidden">
+                    <div class="border-b gh-border pb-3 mb-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-xs font-semibold text-gray-300">
+                            <i class="fa-regular fa-book-open text-blue-400"></i> README.md
+                        </div>
+                        <button onclick="openReadmeModal()" class="gh-secondary-btn text-xs px-2.5 py-1 rounded-md flex items-center gap-1">
+                            <i class="fa-solid fa-pen"></i> Editar README
+                        </button>
+                    </div>
+                    <div id="readme-rendered-content" class="prose prose-invert max-w-none text-sm"></div>
+                </div>
+            </div>
+
+            <!-- TAB: ISSUES -->
+            <div id="tab-content-issues" class="hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold text-gray-400"><i class="fa-solid fa-circle-exclamation"></i> Issues Reportadas</span>
+                    <button onclick="openNewIssueModal()" class="gh-btn text-xs font-semibold px-3 py-1.5 rounded-md">New issue</button>
+                </div>
+                <div id="issues-list" class="border gh-border rounded-md divide-y divide-gray-800 text-sm"></div>
+            </div>
+
+            <!-- TAB: COMMITS -->
+            <div id="tab-content-commits" class="hidden space-y-4">
+                <h3 class="text-sm font-semibold mb-2">Historial Completo de Commits</h3>
+                <div id="commits-history-list" class="border gh-border rounded-md divide-y divide-gray-800 text-sm"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: SUBIR ARCHIVOS / DRAG AND DROP -->
+    <div id="modal-upload" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="gh-bg border gh-border rounded-lg max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b gh-border">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-upload text-blue-400 mr-2"></i> Subir Archivos</h3>
+                <button onclick="closeUploadModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="drop-zone-modal" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropModal(event)" onclick="document.getElementById('file-input-hidden').click()" class="border-2 border-dashed gh-border rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition">
+                <i class="fa-solid fa-file-arrow-up text-3xl text-gray-400 mb-2"></i>
+                <p class="text-sm font-semibold text-gray-300">Arrastra archivos aquí o haz clic para seleccionar</p>
+                <p class="text-xs text-gray-500 mt-1">Soporta múltiples archivos de cualquier tipo</p>
+                <input type="file" id="file-input-hidden" multiple onchange="handleFileSelect(event)" class="hidden">
+            </div>
+            <div id="upload-file-list" class="max-h-32 overflow-y-auto custom-scrollbar space-y-1 text-xs"></div>
+            <div class="flex justify-end space-x-3 pt-3 border-t gh-border">
+                <button onclick="closeUploadModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NUEVA CARPETA -->
+    <div id="modal-new-folder" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="gh-bg border gh-border rounded-lg max-w-sm w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b gh-border">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-folder-plus text-yellow-400 mr-2"></i> Crear Nueva Carpeta</h3>
+                <button onclick="closeNewFolderModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold mb-1">Nombre de la carpeta</label>
+                <input type="text" id="new-folder-name" class="gh-input text-sm rounded-md px-3 py-2 w-full" placeholder="ej. src, docs, assets">
+            </div>
+            <div class="flex justify-end space-x-3 pt-3 border-t gh-border">
+                <button onclick="closeNewFolderModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md">Cancelar</button>
+                <button onclick="createFolder()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md">Crear carpeta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR README (TEXTO, URL O DRAG & DROP) -->
+    <div id="modal-readme" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="gh-bg border gh-border rounded-lg max-w-2xl w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b gh-border">
+                <h3 class="font-bold text-base"><i class="fa-regular fa-book-open text-blue-400 mr-2"></i> Editar README.md</h3>
+                <button onclick="closeReadmeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <!-- OPCIONES DE EDICIÓN README -->
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 1: Cargar desde una URL (RAW Markdown/Texto)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="readme-url-input" class="gh-input text-xs rounded-md px-3 py-2 flex-1" placeholder="https://raw.githubusercontent.com/user/repo/main/README.md">
+                        <button onclick="fetchReadmeFromUrl()" class="gh-secondary-btn text-xs px-3 py-2 rounded-md font-semibold">Cargar URL</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 2: Arrastra un archivo Markdown (.md o .txt)</label>
+                    <div id="drop-zone-readme" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropReadme(event)" class="border-2 border-dashed gh-border rounded-md p-4 text-center cursor-pointer hover:border-blue-400 bg-gray-900/40">
+                        <p class="text-xs text-gray-400"><i class="fa-solid fa-file-arrow-up mr-1"></i> Arrastra y suelta un archivo `.md` aquí para cargar su contenido</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 3: Editar directamente el Markdown</label>
+                    <textarea id="readme-text-editor" class="gh-input font-mono text-xs rounded-md p-3 w-full h-48 custom-scrollbar resize-none" placeholder="# Título del README..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-3 border-t gh-border">
+                <button onclick="closeReadmeModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md">Cancelar</button>
+                <button onclick="saveReadmeContent()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md">Guardar README</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR REPOSITORIO -->
+    <div id="modal-new-repo" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="gh-bg border gh-border rounded-lg max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b gh-border">
+                <h3 class="font-bold text-lg">Create a new repository</h3>
+                <button onclick="closeNewRepoModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Repository name *</label>
+                    <input type="text" id="new-repo-name" class="gh-input text-sm rounded-md px-3 py-2 w-full" placeholder="mi-proyecto">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Description (optional)</label>
+                    <textarea id="new-repo-desc" class="gh-input text-sm rounded-md px-3 py-2 w-full" placeholder="Descripción breve"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Enlace a GitHub Real (opcional)</label>
+                    <input type="text" id="new-repo-github-url" class="gh-input text-sm rounded-md px-3 py-2 w-full" placeholder="https://github.com/usuario/repo">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-4 border-t gh-border">
+                <button onclick="closeNewRepoModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md">Cancel</button>
+                <button onclick="createRepository()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md">Create repository</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITOR DE ARCHIVOS -->
+    <div id="modal-editor" class="fixed inset-0 bg-black/85 hidden flex flex-col z-50 p-3 md:p-6">
+        <div class="gh-bg border gh-border rounded-t-lg p-3 flex justify-between items-center">
+            <input type="text" id="edit-file-name" class="gh-input text-xs rounded px-2.5 py-1.5 w-56 font-mono" placeholder="script.js">
+            <button onclick="closeEditor()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        <div class="flex-1 bg-[#0d1117] border-x gh-border p-3 flex flex-col">
+            <textarea id="edit-file-content" class="flex-1 gh-input font-mono text-xs md:text-sm p-4 rounded-md resize-none" placeholder="// Escribe código aquí..."></textarea>
+        </div>
+        <div class="gh-bg border gh-border rounded-b-lg p-3 flex justify-between items-center">
+            <input type="text" id="commit-msg-input" class="gh-input text-xs rounded px-2.5 py-1 w-64" value="Update file">
+            <div class="flex space-x-3">
+                <button onclick="closeEditor()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md">Cancelar</button>
+                <button onclick="saveFileCommit()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md">Commit changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GIT CLI -->
+    <div id="modal-git-cli" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
+        <div class="gh-bg border gh-border rounded-lg max-w-2xl w-full p-4 space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b gh-border">
+                <span class="text-xs font-bold font-mono text-orange-400"><i class="fa-solid fa-terminal mr-2"></i> Git Bash Simulator</span>
+                <button onclick="closeGitCLIModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="bg-black/90 p-3 rounded font-mono text-xs text-green-400 h-64 overflow-y-auto custom-scrollbar space-y-1" id="cli-output">
+                <div>Git Bash Terminal v2.36.0</div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-mono text-blue-400">$</span>
+                <input type="text" id="cli-input" onkeydown="handleCliKey(event)" class="gh-input font-mono text-xs rounded px-3 py-2 flex-1" placeholder="git status">
+                <button onclick="executeCliCommand()" class="gh-btn text-xs font-semibold px-3 py-2 rounded-md font-mono">Ejecutar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: STATS -->
+    <div id="modal-stats" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="gh-bg border gh-border rounded-lg max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b gh-border">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-chart-pie text-green-400 mr-2"></i> Estadísticas</h3>
+                <button onclick="closeStatsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="flex justify-between p-2 rounded bg-gray-900 border gh-border"><span>Total Repositorios:</span><span id="stat-total-repos" class="font-bold text-blue-400">0</span></div>
+                <div class="flex justify-between p-2 rounded bg-gray-900 border gh-border"><span>Commits Totales:</span><span id="stat-total-commits" class="font-bold text-green-400">0</span></div>
+            </div>
+            <button onclick="closeStatsModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md w-full">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="gh-bg border-t gh-border py-6 px-4 text-center text-xs text-gray-500">
+        © 2026 GitHub Simulator, Inc. All rights reserved.
+    </footer>
+
+    <!-- LOGICA JAVASCRIPT COMPLETA -->
+    <script>
+        let repositories = JSON.parse(localStorage.getItem('gh_ultimate_repos')) || [
+            {
+                id: 1,
+                name: 'ezscript-lang',
+                owner: 'GeminiAdvanced',
+                desc: 'Lenguaje de programación personalizado con soporte completo de sintaxis y carpetas.',
+                githubUrl: 'https://github.com/GeminiAdvanced/ezscript-lang',
+                visibility: 'public',
+                stared: true,
+                branches: ['main', 'dev'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# EZScript Language\nLenguaje de programación ligero diseñado para automatización rápida.\n\n```ez\nprint "¡Hola desde EZScript!";\n```' },
+                    { name: 'interpreter.js', path: 'interpreter.js', folder: '', content: 'console.log("EZScript Parser Initialized...");' },
+                    { name: 'syntax.ez', path: 'syntax.ez', folder: '', content: 'fn main() {\n  let x = 100;\n  print(x);\n}' },
+                    { name: 'config.json', path: 'src/config.json', folder: 'src', content: '{\n  "version": "1.0.0"\n}' }
+                ],
+                folders: ['src'],
+                issues: [{ id: 1, title: 'Agregar soporte para bucles for nativos', author: 'UserX', status: 'open' }],
+                commitsHistory: [{ id: 1, message: 'Initial commit', author: 'GeminiAdvanced', time: 'hace 2 días', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Initial commit',
+                lastCommitTime: 'hace 2 días'
+            }
+        ];
+
+        let currentRepoId = null;
+        let currentFolderPath = ''; // Carpeta vacía representa la raíz '/'
+
+        function saveToStorage() {
+            localStorage.setItem('gh_ultimate_repos', JSON.stringify(repositories));
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-2.5 rounded-lg text-xs font-semibold shadow-xl border flex items-center gap-2 transition transform translate-y-2 opacity-0 ${type === 'success' ? 'bg-[#161b22] border-green-500/40 text-green-400' : 'bg-[#161b22] border-red-500/40 text-red-400'}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function renderHome(filterQuery = '') {
+            const listSidebar = document.getElementById('repo-list-sidebar');
+            const gridCards = document.getElementById('repo-cards-grid');
+            listSidebar.innerHTML = '';
+            gridCards.innerHTML = '';
+
+            const filtered = repositories.filter(r => r.name.toLowerCase().includes(filterQuery.toLowerCase()) || r.desc.toLowerCase().includes(filterQuery.toLowerCase()));
+            document.getElementById('repo-counter-label').innerText = `${filtered.length} repositorios`;
+
+            filtered.forEach(repo => {
+                listSidebar.innerHTML += `
+                    <div onclick="openRepo(${repo.id})" class="flex items-center space-x-2 p-1.5 rounded hover:bg-gray-800 cursor-pointer text-gray-300 truncate">
+                        <i class="fa-solid fa-book text-gray-500 text-xs"></i>
+                        <span class="truncate">${repo.owner}/${repo.name}</span>
+                    </div>
+                `;
+
+                gridCards.innerHTML += `
+                    <div onclick="openRepo(${repo.id})" class="gh-bg border gh-border rounded-lg p-4 cursor-pointer hover:border-gray-500 transition space-y-3 flex flex-col justify-between">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-blue-400 font-semibold text-sm hover:underline">${repo.name}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full border gh-border text-gray-400 capitalize">${repo.visibility}</span>
+                            </div>
+                            <p class="text-xs text-gray-400 line-clamp-2">${repo.desc || 'Sin descripción disponible.'}</p>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t gh-border">
+                            <span><i class="fa-solid fa-circle text-[8px] text-green-400"></i> ${repo.files.length} archivos</span>
+                            <span><i class="fa-solid fa-code-commit"></i> ${repo.commits} commits</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterRepositories(query) { renderHome(query); }
+
+        function showHome() {
+            document.getElementById('view-home').classList.remove('hidden');
+            document.getElementById('view-repo').classList.add('hidden');
+            renderHome();
+        }
+
+        function openRepo(id) {
+            currentRepoId = id;
+            currentFolderPath = ''; // Resetear a raíz
+            const repo = repositories.find(r => r.id === id);
+            if (!repo) return;
+
+            document.getElementById('repo-owner').innerText = repo.owner;
+            document.getElementById('repo-name-title').innerText = repo.name;
+            document.getElementById('repo-visibility-badge').innerText = repo.visibility;
+            document.getElementById('star-count').innerText = repo.stared ? '1' : '0';
+            
+            const originalGithubBtn = document.getElementById('link-original-github');
+            originalGithubBtn.href = repo.githubUrl || `https://github.com/${repo.owner}/${repo.name}`;
+
+            const branchSelector = document.getElementById('branch-selector');
+            branchSelector.innerHTML = repo.branches.map(b => `<option value="${b}" ${b === repo.activeBranch ? 'selected' : ''}>${b}</option>`).join('');
+
+            renderFolderBreadcrumb();
+            renderFiles();
+            renderIssues();
+            renderCommits();
+
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-repo').classList.remove('hidden');
+            switchTab('code');
+        }
+
+        function toggleCodeDropdown() {
+            document.getElementById('code-dropdown-menu').classList.toggle('hidden');
+        }
+
+        function downloadRepoZip() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (!repo) return;
+
+            const zip = new JSZip();
+            repo.files.forEach(file => {
+                const filePath = file.path || file.name;
+                zip.file(filePath, file.content);
+            });
+
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                a.download = `${repo.name}-main.zip`;
+                a.click();
+                showToast(`Descargado ${repo.name}-main.zip con éxito`);
+            });
+        }
+
+        /* NAVEGACIÓN Y CARPETAS */
+        function navigateFolder(path) {
+            currentFolderPath = path;
+            renderFolderBreadcrumb();
+            renderFiles();
+        }
+
+        function renderFolderBreadcrumb() {
+            const container = document.getElementById('folder-breadcrumb');
+            document.getElementById('current-folder-label').innerText = currentFolderPath ? '/' + currentFolderPath : '/';
+
+            if (!currentFolderPath) {
+                container.innerHTML = `<span class="text-gray-300 font-bold"><i class="fa-solid fa-folder text-yellow-400 mr-1"></i> root</span>`;
+                return;
+            }
+
+            const parts = currentFolderPath.split('/');
+            let accumulated = '';
+            let html = `<span class="cursor-pointer hover:underline text-blue-400" onclick="navigateFolder('')">root</span>`;
+
+            parts.forEach((p, idx) => {
+                accumulated += (idx === 0 ? '' : '/') + p;
+                const pathTarget = accumulated;
+                html += ` <span class="text-gray-500">/</span> <span class="cursor-pointer hover:underline text-blue-400" onclick="navigateFolder('${pathTarget}')">${p}</span>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderFiles() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            const tree = document.getElementById('file-tree');
+            tree.innerHTML = '';
+
+            if (!repo.folders) repo.folders = [];
+
+            // Subcarpetas directas en el nivel actual
+            const currentSubfolders = repo.folders.filter(f => {
+                if (!currentFolderPath) return !f.includes('/');
+                return f.startsWith(currentFolderPath + '/') && f.split('/').length === currentFolderPath.split('/').length + 1;
+            });
+
+            // Si estamos dentro de una subcarpeta, mostrar el botón para volver atrás
+            if (currentFolderPath) {
+                const parentFolder = currentFolderPath.includes('/') ? currentFolderPath.substring(0, currentFolderPath.lastIndexOf('/')) : '';
+                tree.innerHTML += `
+                    <div onclick="navigateFolder('${parentFolder}')" class="px-4 py-2.5 flex items-center space-x-2 hover:bg-gray-800/50 cursor-pointer text-gray-400 text-xs font-semibold">
+                        <i class="fa-solid fa-turn-up text-blue-400"></i>
+                        <span>.. (Volver)</span>
+                    </div>
+                `;
+            }
+
+            // Renderizar subcarpetas
+            currentSubfolders.forEach(fPath => {
+                const folderName = fPath.split('/').pop();
+                tree.innerHTML += `
+                    <div onclick="navigateFolder('${fPath}')" class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-800/50 cursor-pointer">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-folder text-yellow-400"></i>
+                            <span class="font-semibold text-gray-200 text-xs">${folderName}</span>
+                        </div>
+                        <span class="text-xs text-gray-500">Carpeta</span>
+                    </div>
+                `;
+            });
+
+            // Renderizar archivos directos de esta carpeta
+            const currentFiles = repo.files.filter(f => (f.folder || '') === currentFolderPath);
+
+            currentFiles.forEach(f => {
+                tree.innerHTML += `
+                    <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-800/50">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-regular fa-file-code text-gray-400"></i>
+                            <span class="cursor-pointer hover:underline text-blue-400 font-mono text-xs" onclick="editFile('${f.path}')">${f.name}</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xs text-gray-500">${repo.lastCommit}</span>
+                            <button onclick="deleteFile('${f.path}')" class="text-red-400 hover:text-red-300 text-xs" title="Eliminar archivo"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Renderizar README en el contenedor de raíz
+            const readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
+            const readmeBox = document.getElementById('readme-container');
+            if (readme && !currentFolderPath) {
+                readmeBox.classList.remove('hidden');
+                document.getElementById('readme-rendered-content').innerHTML = marked.parse(readme.content);
+            } else {
+                readmeBox.classList.add('hidden');
+            }
+        }
+
+        /* CREAR CARPETAS Y SUBIDA DE ARCHIVOS */
+        function openNewFolderModal() { document.getElementById('modal-new-folder').classList.remove('hidden'); }
+        function closeNewFolderModal() { document.getElementById('modal-new-folder').classList.add('hidden'); }
+
+        function createFolder() {
+            const folderInput = document.getElementById('new-folder-name').value.trim();
+            if (!folderInput) return showToast('Escribe un nombre de carpeta', 'error');
+
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (!repo.folders) repo.folders = [];
+
+            const newPath = currentFolderPath ? `${currentFolderPath}/${folderInput}` : folderInput;
+            if (!repo.folders.includes(newPath)) {
+                repo.folders.push(newPath);
+                saveToStorage();
+                closeNewFolderModal();
+                document.getElementById('new-folder-name').value = '';
+                renderFiles();
+                showToast(`Carpeta '${folderInput}' creada`);
+            } else {
+                showToast('La carpeta ya existe', 'error');
+            }
+        }
+
+        /* DRAG AND DROP HANDLERS */
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDropMain(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            processUploadedFiles(files);
+        }
+
+        function handleDropModal(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            processUploadedFiles(files);
+            closeUploadModal();
+        }
+
+        function handleFileSelect(e) {
+            processUploadedFiles(e.target.files);
+            closeUploadModal();
+        }
+
+        function processUploadedFiles(files) {
+            if (!files || files.length === 0) return;
+
+            const repo = repositories.find(r => r.id === currentRepoId);
+            let count = 0;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const content = evt.target.result;
+                    const fileName = file.name;
+                    const filePath = currentFolderPath ? `${currentFolderPath}/${fileName}` : fileName;
+
+                    // Reemplazar o añadir
+                    const existingIdx = repo.files.findIndex(f => f.path === filePath);
+                    if (existingIdx !== -1) {
+                        repo.files[existingIdx].content = content;
+                    } else {
+                        repo.files.push({
+                            name: fileName,
+                            path: filePath,
+                            folder: currentFolderPath,
+                            content: content
+                        });
+                    }
+
+                    count++;
+                    if (count === files.length) {
+                        repo.commits += 1;
+                        repo.lastCommit = `Subidos ${files.length} archivos vía drag & drop`;
+                        repo.commitsHistory.unshift({ id: Date.now(), message: repo.lastCommit, author: 'GeminiAdvanced', time: 'hace un momento', branch: repo.activeBranch });
+                        saveToStorage();
+                        renderFiles();
+                        renderCommits();
+                        showToast(`Se subieron ${files.length} archivos a ${currentFolderPath || 'raíz'}`);
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        function openUploadModal() { document.getElementById('modal-upload').classList.remove('hidden'); }
+        function closeUploadModal() { document.getElementById('modal-upload').classList.add('hidden'); }
+
+        /* EDICIÓN DE README (TEXTO, URL Y DRAG AND DROP) */
+        function openReadmeModal() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            const readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
+            document.getElementById('readme-text-editor').value = readme ? readme.content : '';
+            document.getElementById('readme-url-input').value = '';
+            document.getElementById('modal-readme').classList.remove('hidden');
+        }
+
+        function closeReadmeModal() { document.getElementById('modal-readme').classList.add('hidden'); }
+
+        function fetchReadmeFromUrl() {
+            const url = document.getElementById('readme-url-input').value.trim();
+            if (!url) return showToast('Ingresa una URL válida', 'error');
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error('No se pudo obtener el contenido');
+                    return res.text();
+                })
+                .then(text => {
+                    document.getElementById('readme-text-editor').value = text;
+                    showToast('README cargado correctamente desde URL');
+                })
+                .catch(err => {
+                    showToast('Error al cargar la URL. Verifica que sea RAW o accesible.', 'error');
+                });
+        }
+
+        function handleDropReadme(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('readme-text-editor').value = evt.target.result;
+                    showToast(`README cargado desde '${file.name}'`);
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function saveReadmeContent() {
+            const newContent = document.getElementById('readme-text-editor').value;
+            const repo = repositories.find(r => r.id === currentRepoId);
+
+            let readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
+            if (readme) {
+                readme.content = newContent;
+            } else {
+                repo.files.push({ name: 'README.md', path: 'README.md', folder: '', content: newContent });
+            }
+
+            repo.commits += 1;
+            repo.lastCommit = 'Update README.md';
+            repo.commitsHistory.unshift({ id: Date.now(), message: 'Update README.md', author: 'GeminiAdvanced', time: 'hace un momento', branch: repo.activeBranch });
+
+            saveToStorage();
+            closeReadmeModal();
+            renderFiles();
+            renderCommits();
+            showToast('README.md actualizado con éxito');
+        }
+
+        /* FUNCIONES DE EDITOR Y OTROS */
+        function deleteFile(filePath) {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            repo.files = repo.files.filter(f => f.path !== filePath);
+            saveToStorage();
+            renderFiles();
+            showToast('Archivo eliminado');
+        }
+
+        function editFile(filePath) {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            const file = repo.files.find(f => f.path === filePath);
+            if (!file) return;
+
+            document.getElementById('edit-file-name').value = file.name;
+            document.getElementById('edit-file-content').value = file.content;
+            document.getElementById('modal-editor').classList.remove('hidden');
+        }
+
+        function openEditor() {
+            document.getElementById('edit-file-name').value = '';
+            document.getElementById('edit-file-content').value = '';
+            document.getElementById('modal-editor').classList.remove('hidden');
+        }
+
+        function closeEditor() { document.getElementById('modal-editor').classList.add('hidden'); }
+
+        function saveFileCommit() {
+            const name = document.getElementById('edit-file-name').value.trim();
+            const content = document.getElementById('edit-file-content').value;
+            const msg = document.getElementById('commit-msg-input').value.trim() || 'Update file';
+            const repo = repositories.find(r => r.id === currentRepoId);
+
+            const filePath = currentFolderPath ? `${currentFolderPath}/${name}` : name;
+            let file = repo.files.find(f => f.path === filePath);
+
+            if (file) {
+                file.content = content;
+            } else {
+                repo.files.push({ name, path: filePath, folder: currentFolderPath, content });
+            }
+
+            repo.commits += 1;
+            repo.lastCommit = msg;
+            repo.commitsHistory.unshift({ id: Date.now(), message: msg, author: 'GeminiAdvanced', time: 'hace un momento', branch: repo.activeBranch });
+
+            saveToStorage();
+            closeEditor();
+            openRepo(currentRepoId);
+            showToast('Cambios guardados con éxito');
+        }
+
+        function renderIssues() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            const list = document.getElementById('issues-list');
+            list.innerHTML = repo.issues.length ? repo.issues.map(i => `
+                <div class="p-3 flex items-center justify-between">
+                    <div>
+                        <span class="font-semibold text-white">#${i.id} ${i.title}</span>
+                        <div class="text-xs text-gray-500">por ${i.author}</div>
+                    </div>
+                    <span class="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">${i.status}</span>
+                </div>
+            `).join('') : '<div class="p-4 text-center text-gray-500 text-xs">No hay issues abiertas.</div>';
+        }
+
+        function renderCommits() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            const list = document.getElementById('commits-history-list');
+            list.innerHTML = repo.commitsHistory.map(c => `
+                <div class="p-3 flex justify-between items-center text-xs">
+                    <div>
+                        <div class="font-semibold text-white">${c.message}</div>
+                        <div class="text-gray-500">${c.author} committed ${c.time}</div>
+                    </div>
+                    <span class="font-mono text-gray-400">${c.branch}</span>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            ['code', 'issues', 'commits'].forEach(t => {
+                document.getElementById(`tab-content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = "pb-2 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap";
+            });
+            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).className = "pb-2 border-b-2 border-green-500 font-semibold flex items-center gap-2 whitespace-nowrap";
+        }
+
+        function toggleStarRepo() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            repo.stared = !repo.stared;
+            saveToStorage();
+            openRepo(currentRepoId);
+        }
+
+        function openNewRepoModal() { document.getElementById('modal-new-repo').classList.remove('hidden'); }
+        function closeNewRepoModal() { document.getElementById('modal-new-repo').classList.add('hidden'); }
+
+        function createRepository() {
+            const name = document.getElementById('new-repo-name').value.trim();
+            const desc = document.getElementById('new-repo-desc').value.trim();
+            const githubUrl = document.getElementById('new-repo-github-url').value.trim();
+
+            if (!name) return showToast('El nombre del repositorio es obligatorio', 'error');
+
+            const newRepo = {
+                id: Date.now(),
+                name,
+                owner: 'GeminiAdvanced',
+                desc,
+                githubUrl: githubUrl || `https://github.com/GeminiAdvanced/${name}`,
+                visibility: 'public',
+                stared: false,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [{ name: 'README.md', path: 'README.md', folder: '', content: `# ${name}\n${desc}` }],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Initial commit', author: 'GeminiAdvanced', time: 'hace un momento', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Initial commit',
+                lastCommitTime: 'hace un momento'
+            };
+
+            repositories.push(newRepo);
+            saveToStorage();
+            closeNewRepoModal();
+            showHome();
+            showToast('Repositorio creado correctamente');
+        }
+
+        function openGitCLIModal() { document.getElementById('modal-git-cli').classList.remove('hidden'); }
+        function closeGitCLIModal() { document.getElementById('modal-git-cli').classList.add('hidden'); }
+
+        function executeCliCommand() {
+            const input = document.getElementById('cli-input');
+            const output = document.getElementById('cli-output');
+            const cmd = input.value.trim();
+            if(!cmd) return;
+
+            output.innerHTML += `<div><span class="text-blue-400">$</span> ${cmd}</div>`;
+            if (cmd === 'git status') {
+                output.innerHTML += `<div class="text-gray-400">On branch main. Nothing to commit, working tree clean.</div>`;
+            } else {
+                output.innerHTML += `<div class="text-gray-400">Comando '${cmd}' ejecutado en entorno simulado.</div>`;
+            }
+            input.value = '';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function handleCliKey(e) { if(e.key === 'Enter') executeCliCommand(); }
+
+        function openStatsModal() {
+            document.getElementById('stat-total-repos').innerText = repositories.length;
+            document.getElementById('stat-total-commits').innerText = repositories.reduce((acc, r) => acc + r.commits, 0);
+            document.getElementById('modal-stats').classList.remove('hidden');
+        }
+        function closeStatsModal() { document.getElementById('modal-stats').classList.add('hidden'); }
+
+        function toggleUserMenu() { document.getElementById('user-dropdown-menu').classList.toggle('hidden'); }
+
+        function exportAllData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(repositories));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "github_simulator_backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function resetFactorySettings() {
+            localStorage.removeItem('gh_ultimate_repos');
+            location.reload();
+        }
+
+        // Cierre de menús contextuales al hacer clic fuera
+        window.onclick = function(event) {
+            if (!event.target.closest('.relative')) {
+                document.getElementById('code-dropdown-menu')?.classList.add('hidden');
+                document.getElementById('user-dropdown-menu')?.classList.add('hidden');
+            }
+        }
+
+        // Inicialización
+        renderHome();
+    </script>
+</body>
+</html>
