@@ -87,8 +87,8 @@
                     <div class="absolute right-0 top-0 translate-x-4 -translate-y-4 text-gray-800/20 text-9xl pointer-events-none">
                         <i class="fa-brands fa-github"></i>
                     </div>
-                    <h1 class="text-2xl font-bold mb-2">GitHub Lite <span class="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">v4.0 Pro</span></h1>
-                    <p class="text-sm text-gray-400 mb-4">Entorno de desarrollo simulado con soporte para carpetas, drag-and-drop de archivos, edición avanzada de README.md (vía texto, URL o archivo arrastrado), terminal Git y descargas ZIP.</p>
+                    <h1 class="text-2xl font-bold mb-2">GitHub Lite <span class="text-xs bg-green-500/20 text-green-400 border border-green-500/30 px-2 py-0.5 rounded-full">v4.5 Code Pro</span></h1>
+                    <p class="text-sm text-gray-400 mb-4">Entorno de desarrollo interactivo. Cada uno de los 10 proyectos contiene código fuente real listo para explorar y editar.</p>
                     <div class="flex flex-wrap gap-3">
                         <button onclick="openNewRepoModal()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md"><i class="fa-solid fa-plus mr-1"></i> Crear repositorio</button>
                         <button onclick="openGitCLIModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md"><i class="fa-solid fa-terminal mr-1"></i> Consola Git CLI</button>
@@ -119,7 +119,6 @@
                 <div class="flex items-center space-x-2">
                     <button onclick="toggleStarRepo()" id="star-btn" class="gh-secondary-btn text-xs font-semibold px-3 py-1.5 rounded-md"><i class="fa-regular fa-star text-yellow-400"></i> Star <span id="star-count" class="ml-1 px-1.5 py-0.2 bg-gray-800 rounded-full">0</span></button>
                     
-                    <!-- BOTÓN DE MENÚ DE CÓDIGO <> CODE -->
                     <div class="relative inline-block text-left">
                         <button onclick="toggleCodeDropdown()" class="gh-btn text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5">
                             <i class="fa-solid fa-code"></i> &lt;&gt; Code <i class="fa-solid fa-caret-down text-[10px]"></i>
@@ -148,13 +147,10 @@
 
             <!-- TAB: CODE -->
             <div id="tab-content-code" class="space-y-4">
-                <!-- BARRA DE ACCIONES DE CÓDIGO Y NAVEGACIÓN DE CARPETAS -->
                 <div class="flex flex-wrap justify-between items-center bg-gray-900/50 p-3 rounded-md border gh-border gap-2">
                     <div class="flex items-center space-x-2 text-xs flex-wrap gap-2">
                         <select id="branch-selector" onchange="switchBranch(this.value)" class="gh-input px-2 py-1 rounded font-semibold text-xs"></select>
                         <span class="text-gray-400"><i class="fa-solid fa-clock-rotate-left"></i> <span id="commit-count-display">1</span> commits</span>
-                        
-                        <!-- RUTA DE CARPETAS (BREADCRUMB) -->
                         <div id="folder-breadcrumb" class="flex items-center space-x-1 text-xs font-mono text-blue-400 ml-2"></div>
                     </div>
                     
@@ -165,17 +161,15 @@
                     </div>
                 </div>
 
-                <!-- ZONA DRAG AND DROP DIRECTA EN LA VISTA -->
                 <div id="drop-zone-main" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropMain(event)" class="border-2 border-dashed gh-border rounded-md p-4 text-center transition cursor-pointer hover:border-gray-500 bg-gray-900/30">
                     <p class="text-xs text-gray-400"><i class="fa-solid fa-cloud-arrow-up text-lg mb-1 block text-blue-400"></i> Arrastra y suelta archivos aquí para subirlos a la carpeta actual (<span id="current-folder-label" class="font-mono text-gray-200">/</span>)</p>
                 </div>
 
-                <!-- EXPLORADOR DE ARCHIVOS Y CARPETAS -->
                 <div class="border gh-border rounded-md overflow-hidden">
                     <div class="bg-gray-900 px-4 py-3 border-b gh-border flex items-center justify-between text-xs text-gray-400 flex-wrap gap-2">
                         <div class="flex items-center space-x-2">
                             <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-[10px]">U</div>
-                            <span class="text-white font-semibold">User</span>
+                            <span class="text-white font-semibold" id="repo-author-label">User</span>
                             <span id="latest-commit-msg" class="text-gray-300">Initial commit</span>
                         </div>
                         <span id="latest-commit-time" class="text-gray-500">hace un momento</span>
@@ -183,7 +177,6 @@
                     <div id="file-tree" class="divide-y divide-gray-800 text-sm"></div>
                 </div>
 
-                <!-- SECCIÓN README CON EDICIÓN MULTI-MODO -->
                 <div id="readme-container" class="border gh-border rounded-md p-6 bg-[#0d1117] hidden">
                     <div class="border-b gh-border pb-3 mb-4 flex items-center justify-between">
                         <div class="flex items-center space-x-2 text-xs font-semibold text-gray-300">
@@ -214,7 +207,7 @@
         </div>
     </main>
 
-    <!-- MODAL: SUBIR ARCHIVOS / DRAG AND DROP -->
+    <!-- MODALES -->
     <div id="modal-upload" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
         <div class="gh-bg border gh-border rounded-lg max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center pb-3 border-b gh-border">
@@ -234,7 +227,6 @@
         </div>
     </div>
 
-    <!-- MODAL: NUEVA CARPETA -->
     <div id="modal-new-folder" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
         <div class="gh-bg border gh-border rounded-lg max-w-sm w-full p-6 space-y-4">
             <div class="flex justify-between items-center pb-3 border-b gh-border">
@@ -252,37 +244,31 @@
         </div>
     </div>
 
-    <!-- MODAL: EDITAR README (TEXTO, URL O DRAG & DROP) -->
     <div id="modal-readme" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="gh-bg border gh-border rounded-lg max-w-2xl w-full p-6 space-y-4">
             <div class="flex justify-between items-center pb-3 border-b gh-border">
                 <h3 class="font-bold text-base"><i class="fa-regular fa-book-open text-blue-400 mr-2"></i> Editar README.md</h3>
                 <button onclick="closeReadmeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
-            <!-- OPCIONES DE EDICIÓN README -->
             <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 1: Cargar desde una URL (RAW Markdown/Texto)</label>
+                    <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 1: Cargar desde una URL (RAW Markdown)</label>
                     <div class="flex gap-2">
                         <input type="text" id="readme-url-input" class="gh-input text-xs rounded-md px-3 py-2 flex-1" placeholder="https://raw.githubusercontent.com/user/repo/main/README.md">
                         <button onclick="fetchReadmeFromUrl()" class="gh-secondary-btn text-xs px-3 py-2 rounded-md font-semibold">Cargar URL</button>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 2: Arrastra un archivo Markdown (.md o .txt)</label>
                     <div id="drop-zone-readme" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropReadme(event)" class="border-2 border-dashed gh-border rounded-md p-4 text-center cursor-pointer hover:border-blue-400 bg-gray-900/40">
-                        <p class="text-xs text-gray-400"><i class="fa-solid fa-file-arrow-up mr-1"></i> Arrastra y suelta un archivo `.md` aquí para cargar su contenido</p>
+                        <p class="text-xs text-gray-400"><i class="fa-solid fa-file-arrow-up mr-1"></i> Arrastra y suelta un archivo `.md` aquí</p>
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-xs font-semibold mb-1 text-gray-300">Opción 3: Editar directamente el Markdown</label>
                     <textarea id="readme-text-editor" class="gh-input font-mono text-xs rounded-md p-3 w-full h-48 custom-scrollbar resize-none" placeholder="# Título del README..."></textarea>
                 </div>
             </div>
-
             <div class="flex justify-end space-x-3 pt-3 border-t gh-border">
                 <button onclick="closeReadmeModal()" class="gh-secondary-btn text-xs font-semibold px-4 py-2 rounded-md">Cancelar</button>
                 <button onclick="saveReadmeContent()" class="gh-btn text-xs font-semibold px-4 py-2 rounded-md">Guardar README</button>
@@ -290,7 +276,6 @@
         </div>
     </div>
 
-    <!-- MODAL: CREAR REPOSITORIO -->
     <div id="modal-new-repo" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
         <div class="gh-bg border gh-border rounded-lg max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center pb-3 border-b gh-border">
@@ -318,7 +303,7 @@
         </div>
     </div>
 
-    <!-- MODAL: EDITOR DE ARCHIVOS -->
+    <!-- EDITOR DE CÓDIGO -->
     <div id="modal-editor" class="fixed inset-0 bg-black/85 hidden flex flex-col z-50 p-3 md:p-6">
         <div class="gh-bg border gh-border rounded-t-lg p-3 flex justify-between items-center">
             <input type="text" id="edit-file-name" class="gh-input text-xs rounded px-2.5 py-1.5 w-56 font-mono" placeholder="script.js">
@@ -336,7 +321,6 @@
         </div>
     </div>
 
-    <!-- MODAL: GIT CLI -->
     <div id="modal-git-cli" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 z-50">
         <div class="gh-bg border gh-border rounded-lg max-w-2xl w-full p-4 space-y-3">
             <div class="flex justify-between items-center pb-2 border-b gh-border">
@@ -354,7 +338,6 @@
         </div>
     </div>
 
-    <!-- MODAL: STATS -->
     <div id="modal-stats" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
         <div class="gh-bg border gh-border rounded-lg max-w-md w-full p-6 space-y-4">
             <div class="flex justify-between items-center pb-3 border-b gh-border">
@@ -374,36 +357,431 @@
         © 2026 GitHub Simulator, Inc. All rights reserved.
     </footer>
 
-    <!-- LOGICA JAVASCRIPT COMPLETA -->
+    <!-- LÓGICA CON LOS 10 PROYECTOS Y CÓDIGO FUENTE REAL EN CADA UNO -->
     <script>
         let repositories = JSON.parse(localStorage.getItem('gh_ultimate_repos')) || [
             {
                 id: 1,
-                name: 'ezscript-lang',
-                owner: 'GeminiAdvanced',
-                desc: 'Lenguaje de programación personalizado con soporte completo de sintaxis y carpetas.',
-                githubUrl: 'https://github.com/GeminiAdvanced/ezscript-lang',
+                name: 'physics-simulation-3d',
+                owner: 'AlexDev',
+                desc: '1: Simulación de física 3D interactiva en tiempo real con WebGL y Three.js.',
+                githubUrl: 'https://github.com/AlexDev/physics-simulation-3d',
+                visibility: 'public',
+                stared: true,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# 3D Physics Simulation\n\nSimulador interactivo de física de partículas y cuerpos rígidos impulsado por WebGL y Three.js.' },
+                    { name: 'simulation.js', path: 'simulation.js', folder: '', content: `// Motor de Simulación Física 3D - AlexDev
+class PhysicsEngine {
+    constructor() {
+        this.gravity = -9.81;
+        this.particles = [];
+        this.canvas = document.getElementById('renderCanvas');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+    }
+
+    addParticle(x, y, z, mass = 1.0) {
+        this.particles.push({ x, y, z, vx: Math.random() * 2 - 1, vy: 0, mass });
+        console.log(\`Partícula agregada en (\${x}, \${y}, \${z})\`);
+    }
+
+    update(dt) {
+        this.particles.forEach(p => {
+            p.vy += this.gravity * dt;
+            p.y += p.vy * dt;
+            if (p.y <= 0) {
+                p.y = 0;
+                p.vy *= -0.8; // Rebote elástico
+            }
+        });
+    }
+}
+const engine = new PhysicsEngine();
+engine.addParticle(0, 10, 0);` },
+                    { name: 'index.html', path: 'index.html', folder: '', content: `<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Physics</title>
+    <script src="simulation.js"><\/script>
+</head>
+<body>
+    <canvas id="renderCanvas" width="800" height="600"></canvas>
+</body>
+</html>` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Initial commit con motor Canvas 3D', author: 'AlexDev', time: 'hace 1 día', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Initial commit con motor Canvas 3D',
+                lastCommitTime: 'hace 1 día'
+            },
+            {
+                id: 2,
+                name: 'interactive-book-reader',
+                owner: 'SofiaReads',
+                desc: '2: Libro digital e interactivo con notas, marcadores y audio síntesis integrado.',
+                githubUrl: 'https://github.com/SofiaReads/interactive-book-reader',
+                visibility: 'public',
+                stared: false,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Interactive Book Reader\n\nLector ePub web con resaltador de texto y soporte para lectura por voz (Text-to-Speech).' },
+                    { name: 'reader.js', path: 'reader.js', folder: '', content: `// Lector de Libro Digital Interactivo - SofiaReads
+class BookReader {
+    constructor(bookTitle) {
+        this.title = bookTitle;
+        this.currentPage = 1;
+        this.bookmarks = [];
+    }
+
+    nextPage() {
+        this.currentPage++;
+        this.renderPage();
+    }
+
+    addBookmark(note = '') {
+        this.bookmarks.push({ page: this.currentPage, note });
+        alert(\`Marcador añadido en página \${this.currentPage}\`);
+    }
+
+    speakCurrentText() {
+        const text = document.getElementById('book-content').innerText;
+        const utterance = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(utterance);
+    }
+}` },
+                    { name: 'styles.css', path: 'styles.css', folder: '', content: `body { font-family: 'Georgia', serif; background-color: #fbf0d9; color: #2c2c2c; }
+.book-page { max-width: 650px; margin: 40px auto; line-height: 1.8; font-size: 18px; }` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Agregado soporte ePub y Web Speech', author: 'SofiaReads', time: 'hace 3 días', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Agregado soporte ePub y Web Speech',
+                lastCommitTime: 'hace 3 días'
+            },
+            {
+                id: 3,
+                name: 'web-browser-js',
+                owner: 'CyberGhost',
+                desc: '3: Navegador web funcional simulado en JavaScript con pestañas e historial.',
+                githubUrl: 'https://github.com/CyberGhost/web-browser-js',
                 visibility: 'public',
                 stared: true,
                 branches: ['main', 'dev'],
                 activeBranch: 'main',
                 files: [
-                    { name: 'README.md', path: 'README.md', folder: '', content: '# EZScript Language\nLenguaje de programación ligero diseñado para automatización rápida.\n\n```ez\nprint "¡Hola desde EZScript!";\n```' },
-                    { name: 'interpreter.js', path: 'interpreter.js', folder: '', content: 'console.log("EZScript Parser Initialized...");' },
-                    { name: 'syntax.ez', path: 'syntax.ez', folder: '', content: 'fn main() {\n  let x = 100;\n  print(x);\n}' },
-                    { name: 'config.json', path: 'src/config.json', folder: 'src', content: '{\n  "version": "1.0.0"\n}' }
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Web Browser Simulator\n\nNavegador multitarea ejecutable directamente en el DOM con soporte de iframe sanitizado.' },
+                    { name: 'browser.js', path: 'browser.js', folder: '', content: `// Simulación de Navegador Web - CyberGhost
+class VirtualBrowser {
+    constructor() {
+        this.tabs = [];
+        this.activeTabIndex = -1;
+        this.history = [];
+    }
+
+    openTab(url = 'https://wikipedia.org') {
+        const newTab = { id: Date.now(), url, title: 'Cargando...' };
+        this.tabs.push(newTab);
+        this.activeTabIndex = this.tabs.length - 1;
+        this.loadUrl(url);
+    }
+
+    loadUrl(url) {
+        if (this.activeTabIndex >= 0) {
+            this.tabs[this.activeTabIndex].url = url;
+            this.history.push(url);
+            console.log(\`Navegando a \${url}\`);
+        }
+    }
+}` }
                 ],
-                folders: ['src'],
-                issues: [{ id: 1, title: 'Agregar soporte para bucles for nativos', author: 'UserX', status: 'open' }],
-                commitsHistory: [{ id: 1, message: 'Initial commit', author: 'GeminiAdvanced', time: 'hace 2 días', branch: 'main' }],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Soporte para múltiples pestañas', author: 'CyberGhost', time: 'hace 5 días', branch: 'main' }],
                 commits: 1,
-                lastCommit: 'Initial commit',
-                lastCommitTime: 'hace 2 días'
+                lastCommit: 'Soporte para múltiples pestañas',
+                lastCommitTime: 'hace 5 días'
+            },
+            {
+                id: 4,
+                name: 'win11-react',
+                owner: 'ReactOSDev',
+                desc: '4: Interfaz de Windows 11 en React.js imitando el menú inicio, widgets y ventanas.',
+                githubUrl: 'https://github.com/ReactOSDev/win11-react',
+                visibility: 'public',
+                stared: true,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Win11 React UI\n\nRecreación fidedigna de Windows 11 utilizando React.js y Tailwind CSS.' },
+                    { name: 'App.jsx', path: 'App.jsx', folder: '', content: `import React, { useState } from 'react';
+
+export default function Win11Desktop() {
+    const [isStartOpen, setIsStartOpen] = useState(false);
+    const [windows, setWindows] = useState([]);
+
+    return (
+        <div className="w-screen h-screen bg-cover bg-center bg-[url('wallpaper.jpg')] relative overflow-hidden">
+            {/* Taskbar */}
+            <div className="absolute bottom-0 w-full h-12 bg-gray-900/80 backdrop-blur-md flex items-center justify-center space-x-4">
+                <button onClick={() => setIsStartOpen(!isStartOpen)} className="p-2 hover:bg-white/10 rounded">
+                    <img src="/icons/win11.svg" alt="Start" className="w-6 h-6" />
+                </button>
+            </div>
+            {isStartOpen && <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-96 h-96 bg-gray-800/90 rounded-xl p-4 text-white">Menú Inicio</div>}
+        </div>
+    );
+}` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Initial UI setup con React Hooks', author: 'ReactOSDev', time: 'hace 1 semana', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Initial UI setup con React Hooks',
+                lastCommitTime: 'hace 1 semana'
+            },
+            {
+                id: 5,
+                name: 'webcam-filter-studio',
+                owner: 'LensMaster',
+                desc: '5: Cámara web interactiva con filtros en tiempo real usando Canvas API.',
+                githubUrl: 'https://github.com/LensMaster/webcam-filter-studio',
+                visibility: 'public',
+                stared: false,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Webcam Filter Studio\n\nAplicación de efectos de imagen en tiempo real para cámara web usando HTML5 Canvas API.' },
+                    { name: 'camera.js', path: 'camera.js', folder: '', content: `// Procesamiento de Filtros en Vivo - LensMaster
+async function initWebcam() {
+    const video = document.createElement('video');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    video.play();
+
+    const canvas = document.getElementById('viewport');
+    const ctx = canvas.getContext('2d');
+
+    function applySepiaFilter() {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            let r = data[i], g = data[i+1], b = data[i+2];
+            data[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+            data[i+1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+            data[i+2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+        }
+        ctx.putImageData(imgData, 0, 0);
+        requestAnimationFrame(applySepiaFilter);
+    }
+    applySepiaFilter();
+}` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Filtros sepia y matriz RGB añadidos', author: 'LensMaster', time: 'hace 4 días', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Filtros sepia y matriz RGB añadidos',
+                lastCommitTime: 'hace 4 días'
+            },
+            {
+                id: 6,
+                name: 'scientific-calculator-app',
+                owner: 'MathCoder',
+                desc: '6: Calculadora científica avanzada con funciones algebraicas y trigonometría.',
+                githubUrl: 'https://github.com/MathCoder/scientific-calculator-app',
+                visibility: 'public',
+                stared: true,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Scientific Calculator\n\nEvaluador de expresiones matemáticas complejas con historial de cálculo.' },
+                    { name: 'calc.js', path: 'calc.js', folder: '', content: `// Calculadora Científica - MathCoder
+class ScientificCalculator {
+    calculateExpression(expr) {
+        try {
+            // Reemplazar constantes y funciones
+            let sanitized = expr
+                .replace(/sin/g, 'Math.sin')
+                .replace(/cos/g, 'Math.cos')
+                .replace(/tan/g, 'Math.tan')
+                .replace(/PI/g, 'Math.PI');
+            return Function('"use strict";return (' + sanitized + ')')();
+        } catch (e) {
+            return "Error de sintaxis";
+        }
+    }
+}
+const calc = new ScientificCalculator();
+console.log(calc.calculateExpression("sin(PI / 2) + 10")); // Output: 11` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Optimización de evaluador algebraico', author: 'MathCoder', time: 'hace 2 semanas', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Optimización de evaluador algebraico',
+                lastCommitTime: 'hace 2 semanas'
+            },
+            {
+                id: 7,
+                name: 'alexa-assistant-clone',
+                owner: 'SmartVoice',
+                desc: '7: Asistente virtual tipo Alexa con reconocimiento por voz y respuestas de IA.',
+                githubUrl: 'https://github.com/SmartVoice/alexa-assistant-clone',
+                visibility: 'public',
+                stared: false,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Alexa Voice Assistant Clone\n\nReconocimiento de comandos de voz mediante Web Speech API y respuesta hablada.' },
+                    { name: 'alexa.js', path: 'alexa.js', folder: '', content: `// Clon de Alexa por Voz - SmartVoice
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+
+    recognition.onresult = (event) => {
+        const command = event.results[0][0].transcript.toLowerCase();
+        console.log("Comando recibido:", command);
+        
+        if (command.includes("qué hora es")) {
+            speak(\`Son las \${new Date().toLocaleTimeString()}\`);
+        } else {
+            speak("Lo siento, no entendí ese comando.");
+        }
+    };
+
+    function speak(text) {
+        const uttr = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(uttr);
+    }
+}` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Motor de reconocimiento en español', author: 'SmartVoice', time: 'hace 6 días', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Motor de reconocimiento en español',
+                lastCommitTime: 'hace 6 días'
+            },
+            {
+                id: 8,
+                name: 'win7-simu-web',
+                owner: 'RetroSims',
+                desc: '8: Win7 Simu, simulador de Windows 7 completo con Aero Glass.',
+                githubUrl: 'https://github.com/RetroSims/win7-simu-web',
+                visibility: 'public',
+                stared: true,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Windows 7 Web Simulator\n\nSimulación clásica del escritorio Windows 7 Aero.' },
+                    { name: 'desktop.js', path: 'desktop.js', folder: '', content: `// Gestor de Ventanas Windows 7 Aero - RetroSims
+function makeWindowDraggable(winId) {
+    const win = document.getElementById(winId);
+    let isDragging = false, offset = [0, 0];
+
+    win.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offset = [win.offsetLeft - e.clientX, win.offsetTop - e.clientY];
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        win.style.left = (e.clientX + offset[0]) + 'px';
+        win.style.top = (e.clientY + offset[1]) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => isDragging = false);
+}` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Efecto Aero Glass restaurado', author: 'RetroSims', time: 'hace 1 mes', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Efecto Aero Glass restaurado',
+                lastCommitTime: 'hace 1 mes'
+            },
+            {
+                id: 9,
+                name: 'win95-emulator-js',
+                owner: 'V8Retro',
+                desc: '9: Emulador retro de Windows 95 ejecutable directamente en el navegador.',
+                githubUrl: 'https://github.com/V8Retro/win95-emulator-js',
+                visibility: 'public',
+                stared: true,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Windows 95 JS Emulator\n\nEmulación histórica de Win95 ejecutable en la web.' },
+                    { name: 'emulator.js', path: 'emulator.js', folder: '', content: `// Boot CPU v86 Emulation - V8Retro
+class Win95Emulator {
+    constructor() {
+        this.memorySize = 32 * 1024 * 1024; // 32MB RAM
+    }
+
+    boot() {
+        console.log("Iniciando BIOS...");
+        console.log("Cargando imagen de disco ISO Windows 95...");
+        console.log("Starting Windows 95...");
+    }
+}
+new Win95Emulator().boot();` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Soporte SoundBlaster 16', author: 'V8Retro', time: 'hace 2 semanas', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Soporte SoundBlaster 16',
+                lastCommitTime: 'hace 2 semanas'
+            },
+            {
+                id: 10,
+                name: 'android-phone-simulator',
+                owner: 'DroidMaker',
+                desc: '10: Celular Android simulado con pantalla táctil, apps y barra de notificaciones.',
+                githubUrl: 'https://github.com/DroidMaker/android-phone-simulator',
+                visibility: 'public',
+                stared: true,
+                branches: ['main'],
+                activeBranch: 'main',
+                files: [
+                    { name: 'README.md', path: 'README.md', folder: '', content: '# Android Phone Simulator\n\nEntorno móvil con launcher de aplicaciones e interfaz gestual.' },
+                    { name: 'android.js', path: 'android.js', folder: '', content: `// Launcher Móvil Android - DroidMaker
+class AndroidPhone {
+    constructor() {
+        this.battery = 85;
+        this.apps = ['Cámara', 'Ajustes', 'Play Store', 'Calculadora'];
+    }
+
+    launchApp(appName) {
+        alert(\`Abriendo \${appName}...\`);
+    }
+
+    updateClock() {
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const clockEl = document.getElementById('status-clock');
+        if (clockEl) clockEl.innerText = timeStr;
+    }
+}` }
+                ],
+                folders: [],
+                issues: [],
+                commitsHistory: [{ id: 1, message: 'Google Play Store UI agregada', author: 'DroidMaker', time: 'hace 3 días', branch: 'main' }],
+                commits: 1,
+                lastCommit: 'Google Play Store UI agregada',
+                lastCommitTime: 'hace 3 días'
             }
         ];
 
         let currentRepoId = null;
-        let currentFolderPath = ''; // Carpeta vacía representa la raíz '/'
+        let currentFolderPath = '';
 
         function saveToStorage() {
             localStorage.setItem('gh_ultimate_repos', JSON.stringify(repositories));
@@ -428,38 +806,50 @@
             listSidebar.innerHTML = '';
             gridCards.innerHTML = '';
 
-            const filtered = repositories.filter(r => r.name.toLowerCase().includes(filterQuery.toLowerCase()) || r.desc.toLowerCase().includes(filterQuery.toLowerCase()));
-            document.getElementById('repo-counter-label').innerText = `${filtered.length} repositorios`;
+            const filtered = repositories.filter(r => 
+                r.name.toLowerCase().includes(filterQuery.toLowerCase()) || 
+                r.desc.toLowerCase().includes(filterQuery.toLowerCase()) ||
+                r.owner.toLowerCase().includes(filterQuery.toLowerCase())
+            );
+
+            document.getElementById('repo-counter-label').textContent = `${filtered.length} repositorios`;
 
             filtered.forEach(repo => {
-                listSidebar.innerHTML += `
-                    <div onclick="openRepo(${repo.id})" class="flex items-center space-x-2 p-1.5 rounded hover:bg-gray-800 cursor-pointer text-gray-300 truncate">
-                        <i class="fa-solid fa-book text-gray-500 text-xs"></i>
-                        <span class="truncate">${repo.owner}/${repo.name}</span>
-                    </div>
-                `;
+                const sideItem = document.createElement('div');
+                sideItem.className = 'flex items-center space-x-2 py-1 px-2 rounded hover:bg-gray-800 cursor-pointer text-xs truncate';
+                sideItem.onclick = () => openRepo(repo.id);
+                sideItem.innerHTML = `<i class="fa-solid fa-book text-gray-400"></i><span class="text-gray-400">${repo.owner}/</span><span class="font-semibold text-gray-200 truncate">${repo.name}</span>`;
+                listSidebar.appendChild(sideItem);
 
-                gridCards.innerHTML += `
-                    <div onclick="openRepo(${repo.id})" class="gh-bg border gh-border rounded-lg p-4 cursor-pointer hover:border-gray-500 transition space-y-3 flex flex-col justify-between">
-                        <div class="space-y-1">
-                            <div class="flex items-center justify-between">
-                                <span class="text-blue-400 font-semibold text-sm hover:underline">${repo.name}</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full border gh-border text-gray-400 capitalize">${repo.visibility}</span>
+                const card = document.createElement('div');
+                card.className = 'gh-bg border gh-border rounded-lg p-4 flex flex-col justify-between hover:border-gray-500 transition cursor-pointer';
+                card.onclick = () => openRepo(repo.id);
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-book text-gray-400"></i>
+                                <span class="text-xs text-gray-400 font-mono">${repo.owner}</span>
                             </div>
-                            <p class="text-xs text-gray-400 line-clamp-2">${repo.desc || 'Sin descripción disponible.'}</p>
+                            <span class="text-[10px] border gh-border px-2 py-0.5 rounded-full text-gray-400 capitalize">${repo.visibility}</span>
                         </div>
-                        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-2 border-t gh-border">
-                            <span><i class="fa-solid fa-circle text-[8px] text-green-400"></i> ${repo.files.length} archivos</span>
-                            <span><i class="fa-solid fa-code-commit"></i> ${repo.commits} commits</span>
-                        </div>
+                        <h4 class="font-bold text-blue-400 text-sm hover:underline mb-1">${repo.name}</h4>
+                        <p class="text-xs text-gray-400 line-clamp-2 mb-3">${repo.desc}</p>
+                    </div>
+                    <div class="flex items-center space-x-4 text-xs text-gray-400 border-t gh-border pt-2 mt-2">
+                        <span><i class="fa-regular fa-star text-yellow-400"></i> ${repo.stared ? 1 : 0}</span>
+                        <span><i class="fa-solid fa-code-branch"></i> ${repo.branches ? repo.branches.length : 1}</span>
+                        <span class="text-[10px] text-gray-500">${repo.lastCommitTime || 'Reciente'}</span>
                     </div>
                 `;
+                gridCards.appendChild(card);
             });
         }
 
         function filterRepositories(query) { renderHome(query); }
 
         function showHome() {
+            currentRepoId = null;
             document.getElementById('view-home').classList.remove('hidden');
             document.getElementById('view-repo').classList.add('hidden');
             renderHome();
@@ -467,415 +857,340 @@
 
         function openRepo(id) {
             currentRepoId = id;
-            currentFolderPath = ''; // Resetear a raíz
+            currentFolderPath = '';
             const repo = repositories.find(r => r.id === id);
             if (!repo) return;
 
-            document.getElementById('repo-owner').innerText = repo.owner;
-            document.getElementById('repo-name-title').innerText = repo.name;
-            document.getElementById('repo-visibility-badge').innerText = repo.visibility;
-            document.getElementById('star-count').innerText = repo.stared ? '1' : '0';
-            
-            const originalGithubBtn = document.getElementById('link-original-github');
-            originalGithubBtn.href = repo.githubUrl || `https://github.com/${repo.owner}/${repo.name}`;
-
-            const branchSelector = document.getElementById('branch-selector');
-            branchSelector.innerHTML = repo.branches.map(b => `<option value="${b}" ${b === repo.activeBranch ? 'selected' : ''}>${b}</option>`).join('');
-
-            renderFolderBreadcrumb();
-            renderFiles();
-            renderIssues();
-            renderCommits();
-
             document.getElementById('view-home').classList.add('hidden');
             document.getElementById('view-repo').classList.remove('hidden');
+
+            document.getElementById('repo-owner').textContent = repo.owner;
+            document.getElementById('repo-name-title').textContent = repo.name;
+            document.getElementById('repo-visibility-badge').textContent = repo.visibility;
+            document.getElementById('repo-author-label').textContent = repo.owner;
+            document.getElementById('star-count').textContent = repo.stared ? '1' : '0';
+            document.getElementById('latest-commit-msg').textContent = repo.lastCommit || 'Initial commit';
+            document.getElementById('latest-commit-time').textContent = repo.lastCommitTime || 'Reciente';
+            document.getElementById('link-original-github').href = repo.githubUrl || '#';
+
+            renderBranchSelector(repo);
+            renderFileTree(repo);
+            renderReadme(repo);
+            renderIssues(repo);
+            renderCommitsHistory(repo);
             switchTab('code');
         }
 
-        function toggleCodeDropdown() {
-            document.getElementById('code-dropdown-menu').classList.toggle('hidden');
+        function renderBranchSelector(repo) {
+            const selector = document.getElementById('branch-selector');
+            selector.innerHTML = '';
+            (repo.branches || ['main']).forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b;
+                opt.textContent = `🌿 ${b}`;
+                if (b === (repo.activeBranch || 'main')) opt.selected = true;
+                selector.appendChild(opt);
+            });
         }
 
-        function downloadRepoZip() {
+        function switchBranch(branchName) {
             const repo = repositories.find(r => r.id === currentRepoId);
-            if (!repo) return;
-
-            const zip = new JSZip();
-            repo.files.forEach(file => {
-                const filePath = file.path || file.name;
-                zip.file(filePath, file.content);
-            });
-
-            zip.generateAsync({ type: "blob" }).then(function(content) {
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(content);
-                a.download = `${repo.name}-main.zip`;
-                a.click();
-                showToast(`Descargado ${repo.name}-main.zip con éxito`);
-            });
+            if (repo) {
+                repo.activeBranch = branchName;
+                saveToStorage();
+                showToast(`Cambiado a la rama '${branchName}'`);
+            }
         }
 
-        /* NAVEGACIÓN Y CARPETAS */
-        function navigateFolder(path) {
+        function renderFileTree(repo) {
+            const container = document.getElementById('file-tree');
+            container.innerHTML = '';
+
+            const currentFolderFiles = repo.files.filter(f => (f.folder || '') === currentFolderPath);
+            const subfolders = (repo.folders || []).filter(folderPath => {
+                if (!currentFolderPath) {
+                    return !folderPath.includes('/');
+                } else {
+                    return folderPath.startsWith(currentFolderPath + '/') && folderPath.split('/').length === currentFolderPath.split('/').length + 1;
+                }
+            });
+
+            document.getElementById('current-folder-label').textContent = currentFolderPath ? '/' + currentFolderPath : '/';
+
+            subfolders.forEach(folderPath => {
+                const folderName = folderPath.split('/').pop();
+                const row = document.createElement('div');
+                row.className = 'px-4 py-2.5 flex items-center justify-between hover:bg-gray-800/60 cursor-pointer transition';
+                row.onclick = () => openFolder(folderPath);
+                row.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-folder text-yellow-500 text-base"></i>
+                        <span class="font-semibold text-gray-200">${folderName}</span>
+                    </div>
+                    <span class="text-xs text-gray-500">Carpeta</span>
+                `;
+                container.appendChild(row);
+            });
+
+            currentFolderFiles.forEach(file => {
+                const row = document.createElement('div');
+                row.className = 'px-4 py-2.5 flex items-center justify-between hover:bg-gray-800/60 cursor-pointer transition';
+                row.innerHTML = `
+                    <div class="flex items-center space-x-3 flex-1" onclick="openFile('${file.path}')">
+                        <i class="fa-regular fa-file-code text-blue-400 text-base"></i>
+                        <span class="text-gray-200 hover:underline">${file.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-xs text-gray-500 hidden sm:inline">${repo.lastCommit || 'Update'}</span>
+                        <button onclick="deleteFile('${file.path}')" class="text-gray-500 hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            renderBreadcrumb();
+        }
+
+        function openFolder(path) {
             currentFolderPath = path;
-            renderFolderBreadcrumb();
-            renderFiles();
+            const repo = repositories.find(r => r.id === currentRepoId);
+            renderFileTree(repo);
         }
 
-        function renderFolderBreadcrumb() {
+        function renderBreadcrumb() {
             const container = document.getElementById('folder-breadcrumb');
-            document.getElementById('current-folder-label').innerText = currentFolderPath ? '/' + currentFolderPath : '/';
+            container.innerHTML = `<span onclick="openFolder('')" class="cursor-pointer hover:underline">root</span>`;
+            if (currentFolderPath) {
+                const parts = currentFolderPath.split('/');
+                let accumulated = '';
+                parts.forEach(part => {
+                    accumulated += (accumulated ? '/' : '') + part;
+                    const pathRef = accumulated;
+                    container.innerHTML += ` <span class="text-gray-500">/</span> <span onclick="openFolder('${pathRef}')" class="cursor-pointer hover:underline">${part}</span>`;
+                });
+            }
+        }
 
-            if (!currentFolderPath) {
-                container.innerHTML = `<span class="text-gray-300 font-bold"><i class="fa-solid fa-folder text-yellow-400 mr-1"></i> root</span>`;
+        function renderReadme(repo) {
+            const readmeFile = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
+            const readmeContainer = document.getElementById('readme-container');
+            const contentDiv = document.getElementById('readme-rendered-content');
+
+            if (readmeFile && typeof marked !== 'undefined') {
+                readmeContainer.classList.remove('hidden');
+                contentDiv.innerHTML = marked.parse(readmeFile.content);
+            } else {
+                readmeContainer.classList.add('hidden');
+            }
+        }
+
+        function renderIssues(repo) {
+            const container = document.getElementById('issues-list');
+            const badge = document.getElementById('issues-badge');
+            container.innerHTML = '';
+            badge.textContent = (repo.issues || []).length;
+
+            if (!repo.issues || repo.issues.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-gray-500 text-xs">No hay issues abiertas en este repositorio.</div>`;
                 return;
             }
 
-            const parts = currentFolderPath.split('/');
-            let accumulated = '';
-            let html = `<span class="cursor-pointer hover:underline text-blue-400" onclick="navigateFolder('')">root</span>`;
-
-            parts.forEach((p, idx) => {
-                accumulated += (idx === 0 ? '' : '/') + p;
-                const pathTarget = accumulated;
-                html += ` <span class="text-gray-500">/</span> <span class="cursor-pointer hover:underline text-blue-400" onclick="navigateFolder('${pathTarget}')">${p}</span>`;
-            });
-
-            container.innerHTML = html;
-        }
-
-        function renderFiles() {
-            const repo = repositories.find(r => r.id === currentRepoId);
-            const tree = document.getElementById('file-tree');
-            tree.innerHTML = '';
-
-            if (!repo.folders) repo.folders = [];
-
-            // Subcarpetas directas en el nivel actual
-            const currentSubfolders = repo.folders.filter(f => {
-                if (!currentFolderPath) return !f.includes('/');
-                return f.startsWith(currentFolderPath + '/') && f.split('/').length === currentFolderPath.split('/').length + 1;
-            });
-
-            // Si estamos dentro de una subcarpeta, mostrar el botón para volver atrás
-            if (currentFolderPath) {
-                const parentFolder = currentFolderPath.includes('/') ? currentFolderPath.substring(0, currentFolderPath.lastIndexOf('/')) : '';
-                tree.innerHTML += `
-                    <div onclick="navigateFolder('${parentFolder}')" class="px-4 py-2.5 flex items-center space-x-2 hover:bg-gray-800/50 cursor-pointer text-gray-400 text-xs font-semibold">
-                        <i class="fa-solid fa-turn-up text-blue-400"></i>
-                        <span>.. (Volver)</span>
-                    </div>
-                `;
-            }
-
-            // Renderizar subcarpetas
-            currentSubfolders.forEach(fPath => {
-                const folderName = fPath.split('/').pop();
-                tree.innerHTML += `
-                    <div onclick="navigateFolder('${fPath}')" class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-800/50 cursor-pointer">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-solid fa-folder text-yellow-400"></i>
-                            <span class="font-semibold text-gray-200 text-xs">${folderName}</span>
-                        </div>
-                        <span class="text-xs text-gray-500">Carpeta</span>
-                    </div>
-                `;
-            });
-
-            // Renderizar archivos directos de esta carpeta
-            const currentFiles = repo.files.filter(f => (f.folder || '') === currentFolderPath);
-
-            currentFiles.forEach(f => {
-                tree.innerHTML += `
-                    <div class="px-4 py-2.5 flex items-center justify-between hover:bg-gray-800/50">
-                        <div class="flex items-center space-x-2">
-                            <i class="fa-regular fa-file-code text-gray-400"></i>
-                            <span class="cursor-pointer hover:underline text-blue-400 font-mono text-xs" onclick="editFile('${f.path}')">${f.name}</span>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-xs text-gray-500">${repo.lastCommit}</span>
-                            <button onclick="deleteFile('${f.path}')" class="text-red-400 hover:text-red-300 text-xs" title="Eliminar archivo"><i class="fa-solid fa-trash"></i></button>
+            repo.issues.forEach(issue => {
+                const row = document.createElement('div');
+                row.className = 'p-4 flex items-center justify-between hover:bg-gray-800/40';
+                row.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-circle-exclamation text-green-500"></i>
+                        <div>
+                            <div class="font-semibold text-gray-200">${issue.title}</div>
+                            <div class="text-xs text-gray-500">#${issue.id} por ${issue.author}</div>
                         </div>
                     </div>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">Open</span>
                 `;
-            });
-
-            // Renderizar README en el contenedor de raíz
-            const readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
-            const readmeBox = document.getElementById('readme-container');
-            if (readme && !currentFolderPath) {
-                readmeBox.classList.remove('hidden');
-                document.getElementById('readme-rendered-content').innerHTML = marked.parse(readme.content);
-            } else {
-                readmeBox.classList.add('hidden');
-            }
-        }
-
-        /* CREAR CARPETAS Y SUBIDA DE ARCHIVOS */
-        function openNewFolderModal() { document.getElementById('modal-new-folder').classList.remove('hidden'); }
-        function closeNewFolderModal() { document.getElementById('modal-new-folder').classList.add('hidden'); }
-
-        function createFolder() {
-            const folderInput = document.getElementById('new-folder-name').value.trim();
-            if (!folderInput) return showToast('Escribe un nombre de carpeta', 'error');
-
-            const repo = repositories.find(r => r.id === currentRepoId);
-            if (!repo.folders) repo.folders = [];
-
-            const newPath = currentFolderPath ? `${currentFolderPath}/${folderInput}` : folderInput;
-            if (!repo.folders.includes(newPath)) {
-                repo.folders.push(newPath);
-                saveToStorage();
-                closeNewFolderModal();
-                document.getElementById('new-folder-name').value = '';
-                renderFiles();
-                showToast(`Carpeta '${folderInput}' creada`);
-            } else {
-                showToast('La carpeta ya existe', 'error');
-            }
-        }
-
-        /* DRAG AND DROP HANDLERS */
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.currentTarget.classList.add('drag-over');
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.currentTarget.classList.remove('drag-over');
-        }
-
-        function handleDropMain(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.currentTarget.classList.remove('drag-over');
-            const files = e.dataTransfer.files;
-            processUploadedFiles(files);
-        }
-
-        function handleDropModal(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.currentTarget.classList.remove('drag-over');
-            const files = e.dataTransfer.files;
-            processUploadedFiles(files);
-            closeUploadModal();
-        }
-
-        function handleFileSelect(e) {
-            processUploadedFiles(e.target.files);
-            closeUploadModal();
-        }
-
-        function processUploadedFiles(files) {
-            if (!files || files.length === 0) return;
-
-            const repo = repositories.find(r => r.id === currentRepoId);
-            let count = 0;
-
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const content = evt.target.result;
-                    const fileName = file.name;
-                    const filePath = currentFolderPath ? `${currentFolderPath}/${fileName}` : fileName;
-
-                    // Reemplazar o añadir
-                    const existingIdx = repo.files.findIndex(f => f.path === filePath);
-                    if (existingIdx !== -1) {
-                        repo.files[existingIdx].content = content;
-                    } else {
-                        repo.files.push({
-                            name: fileName,
-                            path: filePath,
-                            folder: currentFolderPath,
-                            content: content
-                        });
-                    }
-
-                    count++;
-                    if (count === files.length) {
-                        repo.commits += 1;
-                        repo.lastCommit = `Subidos ${files.length} archivos vía drag & drop`;
-                        repo.commitsHistory.unshift({ id: Date.now(), message: repo.lastCommit, author: 'GeminiAdvanced', time: 'hace un momento', branch: repo.activeBranch });
-                        saveToStorage();
-                        renderFiles();
-                        renderCommits();
-                        showToast(`Se subieron ${files.length} archivos a ${currentFolderPath || 'raíz'}`);
-                    }
-                };
-                reader.readAsText(file);
+                container.appendChild(row);
             });
         }
 
-        function openUploadModal() { document.getElementById('modal-upload').classList.remove('hidden'); }
-        function closeUploadModal() { document.getElementById('modal-upload').classList.add('hidden'); }
+        function renderCommitsHistory(repo) {
+            const container = document.getElementById('commits-history-list');
+            const badge = document.getElementById('commits-badge');
+            const display = document.getElementById('commit-count-display');
 
-        /* EDICIÓN DE README (TEXTO, URL Y DRAG AND DROP) */
-        function openReadmeModal() {
-            const repo = repositories.find(r => r.id === currentRepoId);
-            const readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
-            document.getElementById('readme-text-editor').value = readme ? readme.content : '';
-            document.getElementById('readme-url-input').value = '';
-            document.getElementById('modal-readme').classList.remove('hidden');
-        }
+            container.innerHTML = '';
+            const history = repo.commitsHistory || [];
+            badge.textContent = history.length;
+            display.textContent = history.length;
 
-        function closeReadmeModal() { document.getElementById('modal-readme').classList.add('hidden'); }
-
-        function fetchReadmeFromUrl() {
-            const url = document.getElementById('readme-url-input').value.trim();
-            if (!url) return showToast('Ingresa una URL válida', 'error');
-
-            fetch(url)
-                .then(res => {
-                    if (!res.ok) throw new Error('No se pudo obtener el contenido');
-                    return res.text();
-                })
-                .then(text => {
-                    document.getElementById('readme-text-editor').value = text;
-                    showToast('README cargado correctamente desde URL');
-                })
-                .catch(err => {
-                    showToast('Error al cargar la URL. Verifica que sea RAW o accesible.', 'error');
-                });
-        }
-
-        function handleDropReadme(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.currentTarget.classList.remove('drag-over');
-
-            const files = e.dataTransfer.files;
-            if (files && files.length > 0) {
-                const file = files[0];
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    document.getElementById('readme-text-editor').value = evt.target.result;
-                    showToast(`README cargado desde '${file.name}'`);
-                };
-                reader.readAsText(file);
-            }
-        }
-
-        function saveReadmeContent() {
-            const newContent = document.getElementById('readme-text-editor').value;
-            const repo = repositories.find(r => r.id === currentRepoId);
-
-            let readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
-            if (readme) {
-                readme.content = newContent;
-            } else {
-                repo.files.push({ name: 'README.md', path: 'README.md', folder: '', content: newContent });
-            }
-
-            repo.commits += 1;
-            repo.lastCommit = 'Update README.md';
-            repo.commitsHistory.unshift({ id: Date.now(), message: 'Update README.md', author: 'GeminiAdvanced', time: 'hace un momento', branch: repo.activeBranch });
-
-            saveToStorage();
-            closeReadmeModal();
-            renderFiles();
-            renderCommits();
-            showToast('README.md actualizado con éxito');
-        }
-
-        /* FUNCIONES DE EDITOR Y OTROS */
-        function deleteFile(filePath) {
-            const repo = repositories.find(r => r.id === currentRepoId);
-            repo.files = repo.files.filter(f => f.path !== filePath);
-            saveToStorage();
-            renderFiles();
-            showToast('Archivo eliminado');
-        }
-
-        function editFile(filePath) {
-            const repo = repositories.find(r => r.id === currentRepoId);
-            const file = repo.files.find(f => f.path === filePath);
-            if (!file) return;
-
-            document.getElementById('edit-file-name').value = file.name;
-            document.getElementById('edit-file-content').value = file.content;
-            document.getElementById('modal-editor').classList.remove('hidden');
-        }
-
-        function openEditor() {
-            document.getElementById('edit-file-name').value = '';
-            document.getElementById('edit-file-content').value = '';
-            document.getElementById('modal-editor').classList.remove('hidden');
-        }
-
-        function closeEditor() { document.getElementById('modal-editor').classList.add('hidden'); }
-
-        function saveFileCommit() {
-            const name = document.getElementById('edit-file-name').value.trim();
-            const content = document.getElementById('edit-file-content').value;
-            const msg = document.getElementById('commit-msg-input').value.trim() || 'Update file';
-            const repo = repositories.find(r => r.id === currentRepoId);
-
-            const filePath = currentFolderPath ? `${currentFolderPath}/${name}` : name;
-            let file = repo.files.find(f => f.path === filePath);
-
-            if (file) {
-                file.content = content;
-            } else {
-                repo.files.push({ name, path: filePath, folder: currentFolderPath, content });
-            }
-
-            repo.commits += 1;
-            repo.lastCommit = msg;
-            repo.commitsHistory.unshift({ id: Date.now(), message: msg, author: 'GeminiAdvanced', time: 'hace un momento', branch: repo.activeBranch });
-
-            saveToStorage();
-            closeEditor();
-            openRepo(currentRepoId);
-            showToast('Cambios guardados con éxito');
-        }
-
-        function renderIssues() {
-            const repo = repositories.find(r => r.id === currentRepoId);
-            const list = document.getElementById('issues-list');
-            list.innerHTML = repo.issues.length ? repo.issues.map(i => `
-                <div class="p-3 flex items-center justify-between">
-                    <div>
-                        <span class="font-semibold text-white">#${i.id} ${i.title}</span>
-                        <div class="text-xs text-gray-500">por ${i.author}</div>
+            history.forEach(c => {
+                const row = document.createElement('div');
+                row.className = 'p-3 flex items-center justify-between hover:bg-gray-800/40';
+                row.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-code-commit text-blue-400"></i>
+                        <div>
+                            <div class="font-semibold text-xs text-gray-200">${c.message}</div>
+                            <div class="text-[10px] text-gray-500">${c.author} committed ${c.time}</div>
+                        </div>
                     </div>
-                    <span class="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/30">${i.status}</span>
-                </div>
-            `).join('') : '<div class="p-4 text-center text-gray-500 text-xs">No hay issues abiertas.</div>';
-        }
-
-        function renderCommits() {
-            const repo = repositories.find(r => r.id === currentRepoId);
-            const list = document.getElementById('commits-history-list');
-            list.innerHTML = repo.commitsHistory.map(c => `
-                <div class="p-3 flex justify-between items-center text-xs">
-                    <div>
-                        <div class="font-semibold text-white">${c.message}</div>
-                        <div class="text-gray-500">${c.author} committed ${c.time}</div>
-                    </div>
-                    <span class="font-mono text-gray-400">${c.branch}</span>
-                </div>
-            `).join('');
+                    <span class="font-mono text-[10px] bg-gray-800 px-2 py-1 rounded text-gray-400">${c.branch || 'main'}</span>
+                `;
+                container.appendChild(row);
+            });
         }
 
         function switchTab(tab) {
             ['code', 'issues', 'commits'].forEach(t => {
                 document.getElementById(`tab-content-${t}`).classList.add('hidden');
-                document.getElementById(`tab-btn-${t}`).className = "pb-2 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap";
+                document.getElementById(`tab-btn-${t}`).className = 'pb-2 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap';
             });
             document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tab}`).className = "pb-2 border-b-2 border-green-500 font-semibold flex items-center gap-2 whitespace-nowrap";
+            document.getElementById(`tab-btn-${tab}`).className = 'pb-2 border-b-2 border-green-500 font-semibold flex items-center gap-2 whitespace-nowrap text-white';
         }
 
         function toggleStarRepo() {
             const repo = repositories.find(r => r.id === currentRepoId);
-            repo.stared = !repo.stared;
-            saveToStorage();
-            openRepo(currentRepoId);
+            if (repo) {
+                repo.stared = !repo.stared;
+                saveToStorage();
+                document.getElementById('star-count').textContent = repo.stared ? '1' : '0';
+                showToast(repo.stared ? 'Repositorio guardado en favoritos' : 'Eliminado de favoritos');
+            }
+        }
+
+        function toggleCodeDropdown() { document.getElementById('code-dropdown-menu').classList.toggle('hidden'); }
+        function toggleUserMenu() { document.getElementById('user-dropdown-menu').classList.toggle('hidden'); }
+
+        function downloadRepoZip() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (!repo || typeof JSZip === 'undefined') return;
+
+            const zip = new JSZip();
+            repo.files.forEach(file => {
+                zip.file(file.path, file.content);
+            });
+
+            zip.generateAsync({ type: 'blob' }).then(content => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = `${repo.name}-main.zip`;
+                a.click();
+                showToast(`Descargando ZIP de ${repo.name}`);
+            });
+        }
+
+        function openNewFolderModal() { document.getElementById('modal-new-folder').classList.remove('hidden'); }
+        function closeNewFolderModal() { document.getElementById('modal-new-folder').classList.add('hidden'); }
+
+        function createFolder() {
+            const name = document.getElementById('new-folder-name').value.trim();
+            if (!name) return;
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (repo) {
+                const fullFolderPath = currentFolderPath ? `${currentFolderPath}/${name}` : name;
+                if (!repo.folders) repo.folders = [];
+                if (!repo.folders.includes(fullFolderPath)) {
+                    repo.folders.push(fullFolderPath);
+                    saveToStorage();
+                    renderFileTree(repo);
+                    showToast(`Carpeta '${name}' creada`);
+                }
+            }
+            closeNewFolderModal();
+            document.getElementById('new-folder-name').value = '';
+        }
+
+        function openUploadModal() { document.getElementById('modal-upload').classList.remove('hidden'); }
+        function closeUploadModal() { document.getElementById('modal-upload').classList.add('hidden'); }
+
+        function openReadmeModal() {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (!repo) return;
+            const readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
+            document.getElementById('readme-text-editor').value = readme ? readme.content : '';
+            document.getElementById('modal-readme').classList.remove('hidden');
+        }
+        function closeReadmeModal() { document.getElementById('modal-readme').classList.add('hidden'); }
+
+        function fetchReadmeFromUrl() {
+            const url = document.getElementById('readme-url-input').value.trim();
+            if (!url) return;
+            fetch(url)
+                .then(res => res.text())
+                .then(text => {
+                    document.getElementById('readme-text-editor').value = text;
+                    showToast('README cargado desde la URL');
+                })
+                .catch(() => showToast('Error al descargar el archivo', 'error'));
+        }
+
+        function saveReadmeContent() {
+            const content = document.getElementById('readme-text-editor').value;
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (repo) {
+                let readme = repo.files.find(f => f.name.toLowerCase() === 'readme.md');
+                if (readme) {
+                    readme.content = content;
+                } else {
+                    repo.files.push({ name: 'README.md', path: 'README.md', folder: '', content });
+                }
+                saveToStorage();
+                renderReadme(repo);
+                showToast('README.md actualizado correctamente');
+            }
+            closeReadmeModal();
+        }
+
+        function openEditor(filePath = '') {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            const file = repo ? repo.files.find(f => f.path === filePath) : null;
+
+            document.getElementById('edit-file-name').value = file ? file.name : '';
+            document.getElementById('edit-file-content').value = file ? file.content : '';
+            document.getElementById('modal-editor').classList.remove('hidden');
+        }
+        function closeEditor() { document.getElementById('modal-editor').classList.add('hidden'); }
+
+        function saveFileCommit() {
+            const filename = document.getElementById('edit-file-name').value.trim();
+            const content = document.getElementById('edit-file-content').value;
+            const msg = document.getElementById('commit-msg-input').value.trim() || 'Update file';
+            const repo = repositories.find(r => r.id === currentRepoId);
+
+            if (repo && filename) {
+                const fullPath = currentFolderPath ? `${currentFolderPath}/${filename}` : filename;
+                let existing = repo.files.find(f => f.path === fullPath);
+                if (existing) {
+                    existing.content = content;
+                } else {
+                    repo.files.push({ name: filename, path: fullPath, folder: currentFolderPath, content });
+                }
+
+                repo.lastCommit = msg;
+                repo.lastCommitTime = 'hace un momento';
+                if (!repo.commitsHistory) repo.commitsHistory = [];
+                repo.commitsHistory.unshift({ id: Date.now(), message: msg, author: 'User', time: 'hace un momento', branch: repo.activeBranch || 'main' });
+
+                saveToStorage();
+                renderFileTree(repo);
+                renderReadme(repo);
+                renderCommitsHistory(repo);
+                showToast(`Commit realizado: "${msg}"`);
+            }
+            closeEditor();
+        }
+
+        function openFile(filePath) { openEditor(filePath); }
+
+        function deleteFile(filePath) {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (repo) {
+                repo.files = repo.files.filter(f => f.path !== filePath);
+                saveToStorage();
+                renderFileTree(repo);
+                renderReadme(repo);
+                showToast('Archivo eliminado');
+            }
         }
 
         function openNewRepoModal() { document.getElementById('modal-new-repo').classList.remove('hidden'); }
@@ -886,14 +1201,14 @@
             const desc = document.getElementById('new-repo-desc').value.trim();
             const githubUrl = document.getElementById('new-repo-github-url').value.trim();
 
-            if (!name) return showToast('El nombre del repositorio es obligatorio', 'error');
+            if (!name) return;
 
             const newRepo = {
                 id: Date.now(),
                 name,
-                owner: 'GeminiAdvanced',
-                desc,
-                githubUrl: githubUrl || `https://github.com/GeminiAdvanced/${name}`,
+                owner: 'User',
+                desc: desc || 'Nuevo repositorio sin descripción',
+                githubUrl: githubUrl || '#',
                 visibility: 'public',
                 stared: false,
                 branches: ['main'],
@@ -901,7 +1216,7 @@
                 files: [{ name: 'README.md', path: 'README.md', folder: '', content: `# ${name}\n${desc}` }],
                 folders: [],
                 issues: [],
-                commitsHistory: [{ id: 1, message: 'Initial commit', author: 'GeminiAdvanced', time: 'hace un momento', branch: 'main' }],
+                commitsHistory: [{ id: Date.now(), message: 'Initial commit', author: 'User', time: 'hace un momento', branch: 'main' }],
                 commits: 1,
                 lastCommit: 'Initial commit',
                 lastCommitTime: 'hace un momento'
@@ -910,64 +1225,133 @@
             repositories.push(newRepo);
             saveToStorage();
             closeNewRepoModal();
-            showHome();
-            showToast('Repositorio creado correctamente');
+            renderHome();
+            showToast(`Repositorio '${name}' creado con éxito`);
+        }
+
+        function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+        function handleDragLeave(e) { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); }
+
+        function handleDropMain(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            processUploadedFiles(e.dataTransfer.files);
+        }
+
+        function handleDropModal(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            processUploadedFiles(e.dataTransfer.files);
+        }
+
+        function handleDropReadme(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('readme-text-editor').value = event.target.result;
+                    showToast('Contenido cargado al editor');
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function handleFileSelect(e) { processUploadedFiles(e.target.files); }
+
+        function processUploadedFiles(files) {
+            const repo = repositories.find(r => r.id === currentRepoId);
+            if (!repo) return;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fullPath = currentFolderPath ? `${currentFolderPath}/${file.name}` : file.name;
+                    let existing = repo.files.find(f => f.path === fullPath);
+                    if (existing) {
+                        existing.content = e.target.result;
+                    } else {
+                        repo.files.push({ name: file.name, path: fullPath, folder: currentFolderPath, content: e.target.result });
+                    }
+                    saveToStorage();
+                    renderFileTree(repo);
+                    renderReadme(repo);
+                    showToast(`Archivo '${file.name}' subido correctamente`);
+                };
+                reader.readAsText(file);
+            });
+            closeUploadModal();
         }
 
         function openGitCLIModal() { document.getElementById('modal-git-cli').classList.remove('hidden'); }
         function closeGitCLIModal() { document.getElementById('modal-git-cli').classList.add('hidden'); }
 
+        function handleCliKey(e) { if (e.key === 'Enter') executeCliCommand(); }
+
         function executeCliCommand() {
             const input = document.getElementById('cli-input');
             const output = document.getElementById('cli-output');
             const cmd = input.value.trim();
-            if(!cmd) return;
+            if (!cmd) return;
 
-            output.innerHTML += `<div><span class="text-blue-400">$</span> ${cmd}</div>`;
+            const line = document.createElement('div');
+            line.innerHTML = `<span class="text-blue-400">$ ${cmd}</span>`;
+            output.appendChild(line);
+
+            const repo = repositories.find(r => r.id === currentRepoId);
+            let resp = '';
+
             if (cmd === 'git status') {
-                output.innerHTML += `<div class="text-gray-400">On branch main. Nothing to commit, working tree clean.</div>`;
+                resp = repo ? `On branch ${repo.activeBranch || 'main'}\nYour branch is up to date with 'origin/${repo.activeBranch || 'main'}'.\nnothing to commit, working tree clean` : 'fatal: not a git repository';
+            } else if (cmd.startsWith('git checkout ')) {
+                const branch = cmd.split(' ')[2];
+                if (repo) {
+                    repo.activeBranch = branch;
+                    if (!repo.branches.includes(branch)) repo.branches.push(branch);
+                    saveToStorage();
+                    resp = `Switched to branch '${branch}'`;
+                }
+            } else if (cmd === 'git log') {
+                resp = repo ? (repo.commitsHistory || []).map(c => `commit ${c.id}\nAuthor: ${c.author}\nDate: ${c.time}\n\n    ${c.message}`).join('\n\n') : 'fatal: not a git repository';
             } else {
-                output.innerHTML += `<div class="text-gray-400">Comando '${cmd}' ejecutado en entorno simulado.</div>`;
+                resp = `bash: command not found: ${cmd}`;
             }
+
+            const respLine = document.createElement('div');
+            respLine.className = 'text-gray-400 whitespace-pre-wrap pl-2';
+            respLine.textContent = resp;
+            output.appendChild(respLine);
+
             input.value = '';
             output.scrollTop = output.scrollHeight;
         }
 
-        function handleCliKey(e) { if(e.key === 'Enter') executeCliCommand(); }
-
         function openStatsModal() {
-            document.getElementById('stat-total-repos').innerText = repositories.length;
-            document.getElementById('stat-total-commits').innerText = repositories.reduce((acc, r) => acc + r.commits, 0);
+            document.getElementById('stat-total-repos').textContent = repositories.length;
+            const totalCommits = repositories.reduce((acc, r) => acc + (r.commitsHistory ? r.commitsHistory.length : 1), 0);
+            document.getElementById('stat-total-commits').textContent = totalCommits;
             document.getElementById('modal-stats').classList.remove('hidden');
         }
         function closeStatsModal() { document.getElementById('modal-stats').classList.add('hidden'); }
 
-        function toggleUserMenu() { document.getElementById('user-dropdown-menu').classList.toggle('hidden'); }
-
         function exportAllData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(repositories));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "github_simulator_backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(repositories, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "github_lite_backup.json");
+            dlAnchor.click();
+            showToast('Backup JSON exportado');
         }
 
         function resetFactorySettings() {
-            localStorage.removeItem('gh_ultimate_repos');
-            location.reload();
-        }
-
-        // Cierre de menús contextuales al hacer clic fuera
-        window.onclick = function(event) {
-            if (!event.target.closest('.relative')) {
-                document.getElementById('code-dropdown-menu')?.classList.add('hidden');
-                document.getElementById('user-dropdown-menu')?.classList.add('hidden');
+            if (confirm("¿Estás seguro de reiniciar a la configuración original con el código de los 10 proyectos?")) {
+                localStorage.removeItem('gh_ultimate_repos');
+                location.reload();
             }
         }
 
-        // Inicialización
+        // Inicializar interfaz
         renderHome();
     </script>
 </body>
